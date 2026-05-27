@@ -1,0 +1,19 @@
+{
+  "name": "@afv/worker",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "bullmq": "latest",
+    "ioredis": "latest",
+    "dotenv": "latest",
+    "pino": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

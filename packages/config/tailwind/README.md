@@ -1,0 +1,1 @@
+Shared tailwind placeholder.

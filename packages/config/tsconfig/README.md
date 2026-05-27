@@ -1,0 +1,1 @@
+Shared tsconfig placeholder.

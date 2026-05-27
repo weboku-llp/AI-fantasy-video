@@ -1,0 +1,36 @@
+{
+  "name": "ai-fantasy-video-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.6.0",
+  "scripts": {
+    "setup:pnpm": "corepack enable && corepack prepare pnpm@10.6.0 --activate",
+    "install:all": "corepack pnpm install",
+    "dev:web": "corepack pnpm --filter @afv/web dev",
+    "dev:admin": "corepack pnpm --filter @afv/admin dev",
+    "dev:api": "corepack pnpm --filter @afv/api dev",
+    "dev:worker": "corepack pnpm --filter @afv/worker dev",
+    "dev:socket": "corepack pnpm --filter @afv/socket dev",
+    "build:web": "corepack pnpm --filter @afv/web build",
+    "build:admin": "corepack pnpm --filter @afv/admin build",
+    "build:api": "corepack pnpm --filter @afv/api build",
+    "build:worker": "corepack pnpm --filter @afv/worker build",
+    "build:socket": "corepack pnpm --filter @afv/socket build",
+    "db:generate": "corepack pnpm --filter @afv/database prisma:generate",
+    "db:migrate": "corepack pnpm --filter @afv/database prisma:migrate",
+    "seed": "corepack pnpm tsx scripts/seed-demo-videos.ts"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "sharp",
+      "msgpackr-extract"
+    ]
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

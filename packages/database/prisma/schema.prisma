@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SubscriptionStatus {
+  FREE
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum VideoType {
+  FULL_30_MIN
+  FULL_15_MIN
+  PREVIEW_30_SEC
+}
+
+enum VideoStatus {
+  DRAFT
+  PROCESSING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum AiJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id                    String             @id @default(cuid())
+  name                  String
+  email                 String             @unique
+  phone                 String?
+  passwordHash          String
+  role                  Role               @default(USER)
+  subscriptionStatus    SubscriptionStatus @default(FREE)
+  subscriptionExpiresAt DateTime?
+  subscriptions         Subscription[]
+  createdAiJobs         AiGenerationJob[]  @relation("AiJobCreatedBy")
+  watchHistory          WatchHistory[]
+  likes                 Like[]
+  reports               Report[]
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+}
+
+model FantasyProfile {
+  id            String            @id @default(cuid())
+  name          String
+  slug          String            @unique
+  bio           String
+  avatarUrl     String
+  coverImageUrl String
+  tags          String[]
+  isActive      Boolean           @default(true)
+  videos        Video[]
+  aiJobs        AiGenerationJob[]
+  reports       Report[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Video {
+  id               String          @id @default(cuid())
+  profileId        String
+  title            String
+  slug             String          @unique
+  description      String
+  type             VideoType
+  durationSeconds  Int
+  videoUrl         String
+  previewUrl       String
+  thumbnailUrl     String
+  storageKey       String
+  streamingAssetId String?
+  status           VideoStatus     @default(DRAFT)
+  isPremium        Boolean
+  profile          FantasyProfile  @relation(fields: [profileId], references: [id])
+  aiJobs           AiGenerationJob[]
+  watchHistory     WatchHistory[]
+  likes            Like[]
+  reports          Report[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Subscription {
+  id                     String   @id @default(cuid())
+  userId                 String
+  planName               String
+  amount                 Int
+  currency               String
+  status                 String
+  razorpayCustomerId     String?
+  razorpaySubscriptionId String?
+  razorpayPaymentId      String?
+  startsAt               DateTime
+  endsAt                 DateTime
+  user                   User     @relation(fields: [userId], references: [id])
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model AiGenerationJob {
+  id              String      @id @default(cuid())
+  profileId       String
+  videoId         String?
+  prompt          String
+  negativePrompt  String
+  durationSeconds Int
+  status          AiJobStatus @default(QUEUED)
+  provider        String
+  outputUrl       String?
+  errorMessage    String?
+  createdById     String
+  profile         FantasyProfile @relation(fields: [profileId], references: [id])
+  video           Video?      @relation(fields: [videoId], references: [id])
+  createdBy       User        @relation("AiJobCreatedBy", fields: [createdById], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model WatchHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  videoId         String
+  progressSeconds Int
+  completed       Boolean  @default(false)
+  user            User     @relation(fields: [userId], references: [id])
+  video           Video    @relation(fields: [videoId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, videoId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, videoId])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  userId      String?
+  videoId     String?
+  profileId   String?
+  reason      String
+  description String
+  status      String
+  user        User?    @relation(fields: [userId], references: [id])
+  video       Video?   @relation(fields: [videoId], references: [id])
+  profile     FantasyProfile? @relation(fields: [profileId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
